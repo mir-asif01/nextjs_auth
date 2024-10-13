@@ -10,10 +10,13 @@ export async function POST(request: NextRequest) {
   try {
     const reqBody = await request.json()
     const { username, email, password } = reqBody
+    console.log({ username, email, password })
+
     const user = await User.findOne({ email })
     if (user) {
       return NextResponse.json({ message: "User already exists. try login" })
     }
+
     const salt = await bcrypt.genSalt(9)
     const hashedPassword = await bcrypt.hash(password, salt)
 
@@ -23,8 +26,10 @@ export async function POST(request: NextRequest) {
       password: hashedPassword,
     })
     const savedUser = await newUser.save()
+    console.log(savedUser)
+
     // send email
-    await sendMail({ email, emailType: "VERIFY", userId: savedUser._id })
+    // await sendMail({ email, emailType: "VERIFY", userId: savedUser._id })
 
     return NextResponse.json({
       message: "User signup successful",
