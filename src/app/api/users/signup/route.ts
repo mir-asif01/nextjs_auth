@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     console.log(savedUser)
 
     // send email
-    // await sendMail({ email, emailType: "VERIFY", userId: savedUser._id })
+    await sendMail({ email, emailType: "VERIFY", userId: savedUser._id })
 
     return NextResponse.json({
       message: "User signup successful",

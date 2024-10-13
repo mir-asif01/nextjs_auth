@@ -1,27 +1,19 @@
 import User from "@/models/userModel"
 import nodemailer from "nodemailer"
 import bcrypt from "bcryptjs"
-export const sendMail = async ({
-  email,
-  emailType,
-  userId,
-}: {
-  email: string
-  emailType: string
-  userId: string
-}) => {
+export const sendMail = async ({ email, emailType, userId }: any) => {
   try {
-    if (emailType === "VERIFY") {
-      const hashedToken = await bcrypt.hash(userId, 9)
+    console.log("log from mailter.ts utility file", email, emailType, userId)
+    const salt = await bcrypt.genSalt(9)
+    const hashedToken = await bcrypt.hash(userId.toString(), salt)
 
+    if (emailType === "VERIFY") {
       const user = await User.findByIdAndUpdate(userId, {
         verifyToken: hashedToken,
         verifyTokenExpiry: Date.now() + 1000 * 60 * 60,
       })
     }
     if (emailType === "RESET") {
-      const hashedToken = await bcrypt.hash(userId, 9)
-
       const user = await User.findByIdAndUpdate(userId, {
         forgotPasswordToken: hashedToken,
         forgotPasswordTokenExpiry: Date.now() + 1000 * 60 * 60,
@@ -38,11 +30,19 @@ export const sendMail = async ({
     })
 
     const mailOptions = {
-      from: "asif@gmail.com",
+      from: "asifbsb2002@gmail.com",
       to: email,
       subject:
         emailType === "VERIFY" ? "Verify your email" : "Password reset email",
-      html: "<b>Hello world?</b>",
+      html: `<p>Click <a href="${
+        process.env.DOMAIN
+      }/verifyemail?token=${hashedToken}">here</a> to ${
+        emailType === "VERIFY" ? "verify your email" : "reset your password"
+      }
+            or copy and paste the link below in your browser. <br> ${
+              process.env.DOMAIN
+            }/verifyemail?token=${hashedToken}
+            </p>`,
     }
 
     const mailResponse = await transporter.sendMail(mailOptions)
