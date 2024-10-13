@@ -1,5 +1,6 @@
+import User from "@/models/userModel"
 import nodemailer from "nodemailer"
-
+import bcrypt from "bcryptjs"
 export const sendMail = async ({
   email,
   emailType,
@@ -10,13 +11,29 @@ export const sendMail = async ({
   userId: string
 }) => {
   try {
+    if (emailType === "VERIFY") {
+      const hashedToken = await bcrypt.hash(userId, 9)
+
+      const user = await User.findByIdAndUpdate(userId, {
+        verifyToken: hashedToken,
+        verifyTokenExpiry: Date.now() + 1000 * 60 * 60,
+      })
+    }
+    if (emailType === "RESET") {
+      const hashedToken = await bcrypt.hash(userId, 9)
+
+      const user = await User.findByIdAndUpdate(userId, {
+        forgotPasswordToken: hashedToken,
+        forgotPasswordTokenExpiry: Date.now() + 1000 * 60 * 60,
+      })
+    }
+    // Looking to send emails in production? Check out our Email API/SMTP product!
     const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false, // true for port 465, false for other ports
+      host: "sandbox.smtp.mailtrap.io",
+      port: 2525,
       auth: {
-        user: "maddison53@ethereal.email",
-        pass: "jn7jnAPss4f63QBp6D",
+        user: process.env.MAILTRAP_USER,
+        pass: process.env.MAILTRAP_PASS,
       },
     })
 
