@@ -1,5 +1,5 @@
 import { connectDb } from "@/db/connectDb"
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
 connectDb()
 
