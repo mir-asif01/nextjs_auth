@@ -9,14 +9,18 @@ export const sendMail = async ({ email, emailType, userId }: any) => {
 
     if (emailType === "VERIFY") {
       const user = await User.findByIdAndUpdate(userId, {
-        verifyToken: hashedToken,
-        verifyTokenExpiry: Date.now() + 1000 * 60 * 60,
+        $set: {
+          verifyToken: hashedToken,
+          verifyTokenExpiry: Date.now() + 1000 * 60 * 60,
+        },
       })
     }
     if (emailType === "RESET") {
       const user = await User.findByIdAndUpdate(userId, {
-        forgotPasswordToken: hashedToken,
-        forgotPasswordTokenExpiry: Date.now() + 1000 * 60 * 60,
+        $set: {
+          forgotPasswordToken: hashedToken,
+          forgotPasswordTokenExpiry: Date.now() + 1000 * 60 * 60,
+        },
       })
     }
     // Looking to send emails in production? Check out our Email API/SMTP product!
